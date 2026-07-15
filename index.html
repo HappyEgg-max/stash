@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Stash</title>
+<style>
+:root{
+  --bg:#f5f5f7;
+  --card:#ffffff;
+  --ink:#1d1d1f;
+  --dim:#86868b;
+  --line:rgba(0,0,0,.06);
+  --blue:#0a84ff;
+  /* soft apple-tint category colors */
+  --food:#ff9500;   --food-bg:#fff4e5;
+  --wo:#30d158;     --wo-bg:#e9f9ee;
+  --act:#0a84ff;    --act-bg:#e8f2ff;
+  --tr:#bf5af2;     --tr-bg:#f6ecfd;
+  --ot:#ff9f0a;     --ot-bg:#fff7e8;
+  --loc:#8e8e93;
+  --r:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,sans-serif;
+  font-size:15px;min-height:100vh;padding-bottom:110px;
+}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+
+/* header */
+header{padding:28px 0 4px;display:flex;justify-content:space-between;align-items:flex-start}
+h1{font-size:32px;font-weight:800;letter-spacing:-.5px}
+.sub{color:var(--dim);font-size:14px;margin-top:3px;font-weight:500}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#a8c7ff,#c9a8ff);
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:13px;flex:none;margin-top:4px}
+
+/* search */
+.search{
+  position:sticky;top:10px;z-index:20;
+  display:flex;align-items:center;gap:9px;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-radius:14px;padding:12px 15px;margin:16px 0 6px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.06);
+}
+.search svg{flex:none;color:var(--dim)}
+.search input{background:none;border:none;outline:none;color:var(--ink);font:500 15.5px inherit;font-family:inherit;width:100%}
+.search input::placeholder{color:var(--dim)}
+
+/* quick location pills */
+.hint{color:var(--dim);font-size:11.5px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;margin:12px 2px 8px}
+.pills{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{
+  flex:none;border:none;cursor:pointer;
+  background:#fff;color:var(--ink);
+  border-radius:999px;padding:8px 14px;
+  font:600 13px inherit;font-family:inherit;
+  box-shadow:0 1px 2px rgba(0,0,0,.06);
+  display:flex;align-items:center;gap:5px;transition:.15s;
+}
+.pill span{opacity:.55;font-size:12px}
+.pill.on{background:var(--ink);color:#fff}
+.pill.on span{opacity:.8}
+
+/* category segmented rail */
+.rail{display:flex;gap:8px;overflow-x:auto;padding:14px 0 16px;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.cat{
+  flex:none;border:none;cursor:pointer;text-align:left;
+  background:var(--card);border-radius:16px;
+  padding:12px 15px;min-width:92px;
+  box-shadow:0 1px 2px rgba(0,0,0,.05);
+  font-family:inherit;color:var(--ink);transition:.15s;
+}
+.cat .ico{
+  width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:15px;
+  background:var(--cbg,#eee);
+}
+.cat .nm{font-weight:700;font-size:13px;margin-top:8px;display:block}
+.cat .ct{color:var(--dim);font-size:11px;font-weight:600}
+.cat.on{outline:2px solid var(--c,var(--ink));outline-offset:-2px}
+
+/* masonry cards */
+.grid{columns:2;column-gap:10px}
+@media(min-width:560px){.grid{columns:3}}
+.card{
+  break-inside:avoid;margin-bottom:10px;display:block;cursor:pointer;
+  background:var(--card);border-radius:var(--r);overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,.06);
+  border:1px solid var(--line);transition:.15s;
+}
+.card:active{transform:scale(.975)}
+.cover{
+  position:relative;min-height:var(--h,120px);
+  background:var(--cbg);
+  display:flex;align-items:center;justify-content:center;font-size:34px;
+}
+.cover .plat{
+  position:absolute;top:10px;right:10px;
+  background:rgba(255,255,255,.85);backdrop-filter:blur(6px);
+  color:var(--ink);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px;box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+.meta{padding:12px 13px 13px}
+.meta h3{font-size:14.5px;font-weight:700;letter-spacing:-.2px;line-height:1.3}
+.meta p{color:var(--dim);font-size:12.5px;line-height:1.45;margin-top:4px;font-weight:500}
+.locrow{display:flex;align-items:center;gap:4px;margin-top:9px;color:var(--loc);font-size:12px;font-weight:600}
+.locrow svg{flex:none}
+.row{display:flex;align-items:center;gap:5px;margin-top:8px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:600;color:var(--dim);background:var(--bg);border-radius:7px;padding:3.5px 8px}
+.badge{font-size:11px;font-weight:700;color:var(--c);background:var(--cbg);border-radius:7px;padding:3.5px 8px}
+
+.empty{text-align:center;color:var(--dim);padding:60px 20px;display:none}
+.empty .big{font-size:38px}
+.empty b{display:block;color:var(--ink);font-size:15px;margin-top:10px}
+.empty span{font-size:13px}
+
+/* dock */
+.dock{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:30;
+  display:flex;align-items:center;gap:2px;
+  background:rgba(255,255,255,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-radius:999px;padding:7px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08),0 16px 40px rgba(0,0,0,.14);
+}
+.dock button{
+  border:none;background:none;color:var(--dim);cursor:pointer;
+  font:700 12.5px inherit;font-family:inherit;padding:10px 16px;border-radius:999px;
+  display:flex;align-items:center;gap:6px;
+}
+.dock button.on{background:var(--bg);color:var(--ink)}
+.dock .add{
+  background:var(--blue);color:#fff;width:44px;height:44px;padding:0;
+  justify-content:center;font-size:22px;font-weight:400;
+  box-shadow:0 4px 12px rgba(10,132,255,.35);
+}
+.note{margin:24px 0 0;padding:12px 14px;background:#fff;border-radius:14px;color:var(--dim);font-size:12px;line-height:1.55;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Stash</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <div class="avatar">XY</div>
+  </header>
+
+  <div class="search">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Search food, workouts, or a place…">
+  </div>
+
+  <div class="hint">Places you've saved</div>
+  <div class="pills" id="pills"></div>
+
+  <div class="rail" id="rail"></div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty"><div class="big">🔍</div><b>No matches</b><span>Try another word, place, or category</span></div>
+
+  <div class="note"><b>Demo.</b> Real version: share a video → AI writes the title, category, tags <b>and detects the place</b> (Tampines, Pasir Ris, Bangkok…) → everything becomes searchable here. Tap a card to watch the original.</div>
+</div>
+
+<nav class="dock">
+  <button class="on">Library</button>
+  <button class="add" onclick="alert('Backup manual paste — main saving is via the share sheet.')">+</button>
+  <button onclick="alert('Opens one random saved video you forgot about 🎲')">Surprise</button>
+</nav>
+
+<script>
+const CATS={
+ Food:{ico:'🍜',c:'var(--food)',bg:'var(--food-bg)'},
+ Workout:{ico:'🏃',c:'var(--wo)',bg:'var(--wo-bg)'},
+ Activity:{ico:'🎨',c:'var(--act)',bg:'var(--act-bg)'},
+ Travel:{ico:'✈️',c:'var(--tr)',bg:'var(--tr-bg)'},
+ Other:{ico:'💡',c:'var(--ot)',bg:'var(--ot-bg)'},
+};
+const DATA=[
+ {cat:'Food',plat:'TikTok',title:'Famous bak chor mee stall',desc:'Hidden hawker gem, queue before 11am.',tags:['hawker','noodles'],loc:'Ang Mo Kio, Singapore',h:120},
+ {cat:'Food',plat:'Instagram',title:'New brunch café by the beach',desc:'Sourdough everything, dog friendly.',tags:['brunch','café'],loc:'Pasir Ris, Singapore',h:140},
+ {cat:'Activity',plat:'TikTok',title:'Pottery painting studio',desc:'Walk-in from $25, good rainy day plan.',tags:['weekend','indoor'],loc:'Bugis, Singapore',h:120},
+ {cat:'Food',plat:'TikTok',title:'15-min garlic butter chicken',desc:'One pan, 6 ingredients, weeknight hero.',tags:['recipe','chicken'],loc:null,h:130},
+ {cat:'Travel',plat:'Instagram',title:'Night market food crawl',desc:'8 stalls at the Sunday walking street.',tags:['street food'],loc:'Chiang Mai, Thailand',h:150},
+ {cat:'Workout',plat:'YouTube',title:'20-min full body, no equipment',desc:'Follow-along HIIT, beginner friendly.',tags:['HIIT','home'],loc:null,h:140},
+ {cat:'Food',plat:'TikTok',title:'Best prata after midnight',desc:'Crispy plaster prata, open till 4am.',tags:['supper','prata'],loc:'Tampines, Singapore',h:120},
+ {cat:'Activity',plat:'Instagram',title:'New boardwalk sunrise walk',desc:'Easy 5km loop, start 6.30am for the light.',tags:['nature','walk'],loc:'Pasir Ris, Singapore',h:130},
+ {cat:'Workout',plat:'TikTok',title:'Fix rounded shoulders in 5 min',desc:'Desk mobility routine, do it daily.',tags:['posture'],loc:null,h:120},
+];
+const grid=document.getElementById('grid'),rail=document.getElementById('rail'),pills=document.getElementById('pills'),
+      q=document.getElementById('q'),empty=document.getElementById('empty'),sub=document.getElementById('sub');
+let cat='all';
+
+function build(){
+  sub.textContent=`${DATA.length} saves · ${DATA.filter(d=>d.loc).length} with places`;
+  // location pills from data
+  const locs=[...new Set(DATA.filter(d=>d.loc).map(d=>d.loc.split(',')[0].trim()))];
+  pills.innerHTML=locs.map(l=>{
+    const n=DATA.filter(d=>d.loc&&d.loc.includes(l)).length;
+    return `<button class="pill" data-l="${l}">📍 ${l} <span>${n}</span></button>`;
+  }).join('');
+  const counts={};DATA.forEach(d=>counts[d.cat]=(counts[d.cat]||0)+1);
+  let html=`<button class="cat on" data-c="all" style="--c:var(--ink);--cbg:#eee"><span class="ico" style="background:#eee">🗂️</span><span class="nm">All</span><span class="ct">${DATA.length}</span></button>`;
+  for(const c in CATS)html+=`<button class="cat" data-c="${c}" style="--c:${CATS[c].c};--cbg:${CATS[c].bg}">
+    <span class="ico" style="background:${CATS[c].bg}">${CATS[c].ico}</span><span class="nm">${c}</span><span class="ct">${counts[c]||0}</span></button>`;
+  rail.innerHTML=html;
+}
+function render(){
+  const t=q.value.trim().toLowerCase();
+  const rows=DATA.filter(d=>{
+    if(cat!=='all'&&d.cat!==cat)return false;
+    if(!t)return true;
+    const hay=(d.title+' '+d.desc+' '+d.tags.join(' ')+' '+(d.loc||'')).toLowerCase();
+    return hay.includes(t);
+  });
+  grid.innerHTML=rows.map(d=>{const c=CATS[d.cat];return `
+   <div class="card" style="--c:${c.c};--cbg:${c.bg}" onclick="alert('Opens the original ${d.plat} video')">
+     <div class="cover" style="--h:${d.h}px"><span>${c.ico}</span><span class="plat">${d.plat}</span></div>
+     <div class="meta">
+       <h3>${d.title}</h3><p>${d.desc}</p>
+       ${d.loc?`<div class="locrow"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>${d.loc}</div>`:''}
+       <div class="row"><span class="badge">${d.cat}</span>${d.tags.map(x=>`<span class="tag">${x}</span>`).join('')}</div>
+     </div>
+   </div>`}).join('');
+  empty.style.display=rows.length?'none':'block';
+}
+pills.addEventListener('click',e=>{
+  const b=e.target.closest('.pill');if(!b)return;
+  const was=b.classList.contains('on');
+  pills.querySelectorAll('.pill').forEach(x=>x.classList.remove('on'));
+  if(!was){b.classList.add('on');q.value=b.dataset.l}else q.value='';
+  render();
+});
+rail.addEventListener('click',e=>{
+  const b=e.target.closest('.cat');if(!b)return;
+  rail.querySelectorAll('.cat').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');cat=b.dataset.c;render();
+});
+q.addEventListener('input',()=>{pills.querySelectorAll('.pill').forEach(x=>x.classList.remove('on'));render()});
+build();render();
+</script>
+</body>
+</html>
